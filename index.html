@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧠 Pomodoro</title>
+  <link rel="icon" href="https://emoji.gg/assets/emoji/brain.png">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background-color: var(--bg-color, #f2f2f2);
+      color: var(--text-color, #000);
+      transition: background 0.3s, color 0.3s;
+    }
+    #timer {
+      font-size: 4em;
+      margin-bottom: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .dark-mode {
+      --bg-color: #121212;
+      --text-color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1 id="timer">25:00</h1>
+    <button onclick="iniciarCronometro()">Iniciar</button>
+    <button onclick="pausarCronometro()">Pausar</button>
+    <button onclick="resetarCronometro()">Resetar</button>
+    <br><br>
+    <button onclick="mudarModo('foco')">Foco</button>
+    <button onclick="mudarModo('pausa')">Pausa Curta</button>
+    <button onclick="mudarModo('pausaLonga')">Pausa Longa</button>
+    <button onclick="mudarModo('turbo')">Pomodoro Turbo 🏁</button>
+    <br><br>
+    <button onclick="alternarTema()">🌙 Alternar Tema</button>
+    <audio id="somAlarme" src="https://notificationsounds.com/storage/sounds/file-sounds-1146-pristine.mp3" preload="auto"></audio>
+  </div>
+
+  <script>
+    let tempo = 25 * 60;
+    let intervalo;
+    let modo = 'foco';
+    const somAlarme = document.getElementById('somAlarme');
+
+    function atualizarDisplay() {
+      const minutos = Math.floor(tempo / 60);
+      const segundos = tempo % 60;
+      const emoji = modo === 'foco' ? '🧠' : modo === 'turbo' ? '🔥' : '☕';
+      document.getElementById('timer').textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+      document.title = `${emoji} ${modo.toUpperCase()} - ${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+    }
+
+    function iniciarCronometro() {
+      intervalo = setInterval(() => {
+        if (tempo > 0) {
+          tempo--;
+          atualizarDisplay();
+        } else {
+          clearInterval(intervalo);
+          somAlarme.play();
+          alert(`Tempo de ${modo} acabou!`);
+          if (modo === 'foco') {
+            modo = 'pausa'; tempo = 5 * 60;
+          } else if (modo === 'turbo') {
+            modo = 'pausa'; tempo = 10 * 60;
+          } else {
+            modo = 'foco'; tempo = 25 * 60;
+          }
+          atualizarDisplay();
+        }
+      }, 1000);
+    }
+
+    function pausarCronometro() {
+      clearInterval(intervalo);
+    }
+
+    function resetarCronometro() {
+      clearInterval(intervalo);
+      tempo = definirTempoPorModo(modo);
+      atualizarDisplay();
+    }
+
+    function mudarModo(novoModo) {
+      clearInterval(intervalo);
+      modo = novoModo;
+      tempo = definirTempoPorModo(novoModo);
+      atualizarDisplay();
+    }
+
+    function definirTempoPorModo(modo) {
+      switch(modo) {
+        case 'foco': return 25 * 60;
+        case 'pausa': return 5 * 60;
+        case 'pausaLonga': return 15 * 60;
+        case 'turbo': return 50 * 60;
+        default: return 25 * 60;
+      }
+    }
+
+    function alternarTema() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    atualizarDisplay();
+  </script>
+</body>
+</html>
